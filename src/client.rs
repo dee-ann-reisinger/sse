@@ -1,4 +1,5 @@
 use super::*;
+use super::hyper::header::{Authorization,Bearer};
 
 #[derive(Default, PartialEq, Eq, Debug)]
 pub struct Event {
@@ -66,10 +67,11 @@ pub struct SSEStream<C: hyper::client::Connect> {
     inner: Option<SSEBodyStream>,
 
     last_event_id: Option<String>,
+    auth_header: Option<Authorization<Bearer>>
 }
 
 impl<C: hyper::client::Connect> SSEStream<C> {
-    pub fn new(url: hyper::Uri, client: hyper::Client<C>) -> Self {
+    pub fn new(url: hyper::Uri, client: hyper::Client<C>, auth_header: Option<Authorization<Bearer>>) -> Self {
         Self {
             url,
             client: client.clone(),
@@ -78,6 +80,7 @@ impl<C: hyper::client::Connect> SSEStream<C> {
             inner: None,
 
             last_event_id: None,
+            auth_header
         }
     }
 }
@@ -134,6 +137,11 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
         if let Some(ref last_event_id) = self.last_event_id {
             let headers = req.headers_mut();
             headers.set(LastEventId(last_event_id.clone()));
+        }
+
+        if let Some(ref auth_header) = self.auth_header {
+            let headers = req.headers_mut();
+            headers.set(auth_header.clone());
         }
 
         let client = self.client.clone();
