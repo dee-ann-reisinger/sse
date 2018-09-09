@@ -121,6 +121,7 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
                     println!("got none!");
                     // server drops connection, try to reconnect
                     // fallthrough
+                    return Ok(Async::NotReady)
                 }
                 Ok(Async::Ready(Some(ev))) => {
                     if let Some(ref event_id) = ev.id {
