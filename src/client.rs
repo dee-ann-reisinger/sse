@@ -111,7 +111,8 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
         if let Some(ref mut s) = self.inner {
             match s.poll() {
                 Err(_e) => {
-                    error!("failed to read body, trying to reconnect: {:?}", _e);
+                    println!("{:?}", _e);
+                    //error!("failed to read body, trying to reconnect: {:?}", _e);
                     // fallthrough
                 }
                 Ok(Async::NotReady) => return Ok(Async::NotReady),
