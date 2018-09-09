@@ -102,6 +102,7 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
                     return Ok(Async::NotReady);
                 }
                 Ok(Async::Ready(resp)) => {
+                    print("connected!")
                     info!("sse stream connected: {}", self.url);
                     self.inner = Some(SSEBodyStream::new(resp.body()));
                 }
@@ -117,6 +118,7 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
                 }
                 Ok(Async::NotReady) => return Ok(Async::NotReady),
                 Ok(Async::Ready(None)) => {
+                    println!("got none!");
                     // server drops connection, try to reconnect
                     // fallthrough
                 }
