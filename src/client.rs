@@ -102,7 +102,7 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
                     return Ok(Async::NotReady);
                 }
                 Ok(Async::Ready(resp)) => {
-                    print("connected!")
+                    println!("connected!");
                     info!("sse stream connected: {}", self.url);
                     self.inner = Some(SSEBodyStream::new(resp.body()));
                 }
