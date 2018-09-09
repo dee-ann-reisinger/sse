@@ -93,8 +93,7 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
         if let Some(mut fut_req) = self.fut_req.take() {
             match fut_req.poll() {
                 Err(_e) => {
-                    println!("{:?}", _e);
-                    //error!("failed to connect, retry: {:?}", _e);
+                    error!("failed to connect, retry: {:?}", _e);
                     // fallthrough
                 }
                 Ok(Async::NotReady) => {
@@ -102,7 +101,6 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
                     return Ok(Async::NotReady);
                 }
                 Ok(Async::Ready(resp)) => {
-                    println!("connected!");
                     info!("sse stream connected: {}", self.url);
                     self.inner = Some(SSEBodyStream::new(resp.body()));
                 }
@@ -112,16 +110,13 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
         if let Some(ref mut s) = self.inner {
             match s.poll() {
                 Err(_e) => {
-                    println!("{:?}", _e);
                     //error!("failed to read body, trying to reconnect: {:?}", _e);
                     // fallthrough
                 }
                 Ok(Async::NotReady) => return Ok(Async::NotReady),
                 Ok(Async::Ready(None)) => {
-                    println!("got none!");
                     // server drops connection, try to reconnect
                     // fallthrough
-                    return Ok(Async::NotReady)
                 }
                 Ok(Async::Ready(Some(ev))) => {
                     if let Some(ref event_id) = ev.id {
@@ -133,7 +128,6 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
             }
         }
 
-        println!("trying to connect!");
         // retry case
         self.inner = None;
         info!("trying to connect: {}", self.url);
