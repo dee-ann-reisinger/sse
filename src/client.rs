@@ -93,7 +93,11 @@ impl<C: hyper::client::Connect> Stream for SSEStream<C> {
         if let Some(mut fut_req) = self.fut_req.take() {
             match fut_req.poll() {
                 Err(_e) => {
-                    println!("failed to connect, retry: {:?}", _e);
+                    if let hyper::error::Error::Io(e) = _e {
+                        if let Some(inner_e) = e.get_ref() {
+                            println!("{:?}", inner_e);
+                        }
+                    }
                     //error!("failed to connect, retry: {:?}", _e);
                     // fallthrough
                 }
